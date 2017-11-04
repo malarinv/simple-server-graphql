@@ -1,0 +1,19 @@
+language: node_js
+node_js:
+- 8
+cache:
+  directories:
+  - node_modules
+script:
+- npm install
+- npm run lint
+- npm run build
+env:
+  global:
+  - COMMIT=${TRAVIS_COMMIT::8}
+after_success:
+- export REPO=callthemonline/simple-server-graphql
+- export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH
+  ; fi`
+- docker build -f Dockerfile -t $REPO:$COMMIT .
+- docker tag $REPO:$COMMIT $REPO:$TAG
