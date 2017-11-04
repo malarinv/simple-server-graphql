@@ -7,7 +7,6 @@ cache:
 script:
 - npm install
 - npm run lint
-- npm run build
 env:
   global:
   - COMMIT=${TRAVIS_COMMIT::8}
