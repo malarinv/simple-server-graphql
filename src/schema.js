@@ -1,11 +1,22 @@
 module.exports = /* GraphQL */ `
 
+scalar JSON
+
 type Query {
   unixTimestamp: Int!
 }
 
+
+input GenerateSipConfigInput {
+  phoneNumber: String!
+}
+
+type GenerateSipConfigPayload {
+  config: JSON
+}
+
 type Mutation {
-  generateSipToken: ID!
+  generateSipConfig(input: GenerateSipConfigInput!): GenerateSipConfigPayload!
 }
 
 # type Subscription {
