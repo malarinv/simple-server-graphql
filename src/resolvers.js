@@ -11,11 +11,20 @@ const resolvers = {
     unixTimestamp() {
       return Math.round(+new Date() / 1000);
     },
+
+    user(obj, args, { token }) {
+      if (!token) { return null; }
+      return {
+        id: 111111,
+        displayName: token,
+      };
+    },
   },
 
   Mutation: {
-    generateSipConfig: (_, { input: { phoneNumber } }) => {
-      if (ALLOWED_PHONE_NUMBERS_FOR_GUESTS.indexOf(phoneNumber) === -1) {
+    generateSipConfig: (_, { input: { phoneNumber } }, { token }) => {
+      console.log('TOKEN ISsss:', token);
+      if ((token === 'undefined' || !token) && ALLOWED_PHONE_NUMBERS_FOR_GUESTS.indexOf(phoneNumber) === -1) {
         throw new Error(`Cannot provide auth for calling ${phoneNumber} to guests. Please login.`);
       }
       return {
@@ -32,7 +41,7 @@ const resolvers = {
             },
           ],
           extraHeaders: {
-            invite: [`X-Token: ${42}`],
+            invite: [`X-Token: ${token}`],
           },
         },
       };

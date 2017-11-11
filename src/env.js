@@ -24,4 +24,20 @@ module.exports = envalid.cleanEnv(process.env, {
     default: 4001,
     desc: 'subscription port (websocket)',
   }),
+  PAYPAL_MODE: envalid.str({
+    default: 'sandbox',
+    desc: 'paypal environment sandbox | live',
+  }),
+  PAYPAL_CLIENT_ID: envalid.str({
+    default: '',
+    desc: 'paypal client id',
+  }),
+  PAYPAL_CLIENT_SECRET: envalid.str({
+    default: '',
+    desc: 'paypal client secret',
+  }),
+  PAYPAL_REDIRECT_URL: envalid.url({
+    default: '/login/callback',
+    desc: 'paypal redirect url',
+  }),
 });
