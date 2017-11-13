@@ -29,15 +29,15 @@ module.exports = envalid.cleanEnv(process.env, {
     desc: 'paypal environment sandbox | live',
   }),
   PAYPAL_CLIENT_ID: envalid.str({
-    default: '',
+    default: 'NULL',
     desc: 'paypal client id',
   }),
   PAYPAL_CLIENT_SECRET: envalid.str({
-    default: '',
+    default: 'NULL',
     desc: 'paypal client secret',
   }),
   PAYPAL_REDIRECT_URL: envalid.url({
-    default: '/login/callback',
+    default: 'http://localhost/callback',
     desc: 'paypal redirect url',
   }),
   MONGO_URL: envalid.str({
