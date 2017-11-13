@@ -41,7 +41,7 @@ module.exports = envalid.cleanEnv(process.env, {
     desc: 'paypal redirect url',
   }),
   MONGO_URL: envalid.str({
-    default: 'mongodb://localhost/them',
+    default: 'mongodb://localhost/callthemonline',
     desc: 'mongodb default connection details',
   }),
 
