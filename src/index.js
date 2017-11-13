@@ -9,6 +9,7 @@ const cors = require('cors');
 const paypal = require('paypal-rest-sdk');
 
 const { openIdConnect } = paypal;
+const mongoose = require('mongoose');
 
 const typeDefs = require('./schema');
 const resolvers = require('./resolvers');
@@ -25,7 +26,14 @@ const {
   PAYPAL_CLIENT_ID,
   PAYPAL_CLIENT_SECRET,
   PAYPAL_REDIRECT_URL,
+  MONGO_URL,
 } = require('./env');
+
+mongoose.connect(MONGO_URL, { useMongoClient: true });
+mongoose.Promise = global.Promise;
+const User = mongoose.model('User', {
+  name: String, paypalCode: String, paypalId: String, token: String, updated: Date, created: Date,
+});
 
 const corsOptions = {
   credentials: true,
@@ -62,7 +70,7 @@ const getUserDetails = (authCode) => new Promise((resolve, reject) => {
           console.log('Given Name:', userinfo.given_name);
           // Logout url
           console.log('LOGOUT URL: ', openIdConnect.logoutUrl({ 'id_token': tokeninfo.id_token }));
-          resolve(userinfo.given_name);
+          resolve(userinfo);
         }
       });
     }
@@ -72,6 +80,7 @@ const getUserDetails = (authCode) => new Promise((resolve, reject) => {
 
 const httpServer = express();
 httpServer.use(cors(corsOptions));
+console.log('Date now:', new Date());
 
 /* GET home page. */
 httpServer.get('/login', (req, res) => {
@@ -81,14 +90,37 @@ httpServer.get('/login', (req, res) => {
 });
 
 httpServer.get('/login/callback', async (req, res) => {
-  const paypalToken = req.query.code;
-  if (paypalToken) {
-    console.log('auth OK for:', paypalToken);
+  const paypalCode = req.query.code;
+
+  if (paypalCode) {
+    console.log('auth OK for:', paypalCode);
     try {
-      const userOk = await getUserDetails(paypalToken);
-      console.log('User name is:', userOk);
-      res.cookie('token', userOk);
-      res.redirect('/');
+      const userOk = await getUserDetails(paypalCode);
+      const paypalId = userOk.user_id.split('/').slice(-1)[0];
+
+      const options = { upsert: true, new: true, setDefaultsOnInsert: true };
+      const newUser = {
+        paypalId, token: 'NewUserTokenGenerate()', name: userOk.name, updated: new Date(),
+      };
+      const existingUser = { paypalId };
+
+      User.findOneAndUpdate(
+        existingUser,
+        newUser,
+        options,
+        (error, user) => {
+          if (error) return;
+          // do something with document
+          console.log(user.token);
+          console.log('User name is:', userOk.given_name);
+          console.log('PayPal user_id:', paypalId.split('/').slice(-1)[0]);
+
+          res.cookie('token', userOk.name);
+          res.redirect('/');
+        },
+
+      );
+
       return;
     } catch (e) {
       console.log('E! ', e);
