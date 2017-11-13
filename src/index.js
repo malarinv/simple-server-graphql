@@ -9,7 +9,6 @@ const cors = require('cors');
 const paypal = require('paypal-rest-sdk');
 
 const { openIdConnect } = paypal;
-const mongoose = require('mongoose');
 
 const typeDefs = require('./schema');
 const resolvers = require('./resolvers');
@@ -26,14 +25,9 @@ const {
   PAYPAL_CLIENT_ID,
   PAYPAL_CLIENT_SECRET,
   PAYPAL_REDIRECT_URL,
-  MONGO_URL,
 } = require('./env');
 
-mongoose.connect(MONGO_URL, { useMongoClient: true });
-mongoose.Promise = global.Promise;
-const User = mongoose.model('User', {
-  name: String, paypalCode: String, paypalId: String, token: String, updated: Date, created: Date,
-});
+const { User, Event } = require('./db');
 
 const corsOptions = {
   credentials: true,
@@ -85,15 +79,26 @@ console.log('Date now:', new Date());
 /* GET home page. */
 httpServer.get('/login', (req, res) => {
   const redirectUrl = openIdConnect.authorizeUrl({ 'scope': 'openid https://uri.paypal.com/services/paypalattributes profile' });
+  Event.create({
+    type: 'LOGIN', action: 'LOGIN REQUEST', created: new Date(),
+  });
+
   console.log('redirecting to:', redirectUrl);
   res.redirect(redirectUrl);
 });
 
 httpServer.get('/login/callback', async (req, res) => {
   const paypalCode = req.query.code;
+  Event.create({
+    type: 'LOGIN', action: 'CALBACK CHECK', created: new Date(),
+  });
 
   if (paypalCode) {
     console.log('auth OK for:', paypalCode);
+    Event.create({
+      type: 'LOGIN', login: paypalCode, action: 'CALBACK OK', created: new Date(),
+    });
+
     try {
       const userOk = await getUserDetails(paypalCode);
       const paypalId = userOk.user_id.split('/').slice(-1)[0];
@@ -114,6 +119,9 @@ httpServer.get('/login/callback', async (req, res) => {
           console.log(user.token);
           console.log('User name is:', userOk.given_name);
           console.log('PayPal user_id:', paypalId.split('/').slice(-1)[0]);
+          Event.create({
+            type: 'USER', login: paypalId.split('/').slice(-1)[0], action: 'CREATED', created: new Date(),
+          });
 
           res.cookie('token', userOk.name);
           res.redirect('/');
@@ -126,6 +134,10 @@ httpServer.get('/login/callback', async (req, res) => {
       console.log('E! ', e);
     }
   }
+  Event.create({
+    type: 'LOGIN', action: 'FAILED TO PROCESS USER', created: new Date(),
+  });
+
   res.redirect('/sorry');
 });
 

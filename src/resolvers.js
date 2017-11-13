@@ -2,6 +2,7 @@ const GraphQLJSON = require('graphql-type-json');
 // const { PubSub, withFilter } = require('graphql-subscriptions');
 
 // const pubsub = new PubSub();
+const { Event } = require('./db'); // type: String, login: String, action: String, destination: String, created: Date,
 
 const { ALLOWED_PHONE_NUMBERS_FOR_GUESTS } = require('./env');
 
@@ -23,10 +24,21 @@ const resolvers = {
 
   Mutation: {
     generateSipConfig: (_, { input: { phoneNumber } }, { token }) => {
+      Event.create({
+        type: 'REQUEST', action: 'PROCESS CALL REQUEST', destination: phoneNumber, created: new Date(),
+      });
       console.log('TOKEN ISsss:', token);
       if ((token === 'undefined' || !token) && ALLOWED_PHONE_NUMBERS_FOR_GUESTS.indexOf(phoneNumber) === -1) {
+        Event.create({
+          type: 'REQUEST', action: 'FAIL', destination: phoneNumber, created: new Date(),
+        });
+
         throw new Error(`Cannot provide auth for calling ${phoneNumber} to guests. Please login.`);
       }
+      Event.create({
+        type: 'CALL', login: token, action: 'SUCCESS', destination: phoneNumber, created: new Date(),
+      });
+
       return {
         config: {
           host: 'dev.callthem.online',
