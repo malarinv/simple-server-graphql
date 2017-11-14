@@ -118,12 +118,12 @@ httpServer.get('/login/callback', async (req, res) => {
           // do something with document
           console.log(user.token);
           console.log('User name is:', userOk.given_name);
-          console.log('PayPal user_id:', paypalId.split('/').slice(-1)[0]);
+          console.log('PayPal user_id:', paypalId);
           Event.create({
             type: 'USER', login: paypalId.split('/').slice(-1)[0], action: 'CREATED', created: new Date(),
           });
-
-          res.cookie('token', userOk.name);
+          const theToken = `invite ${userOk.name} ${paypalId}`;
+          res.cookie('token', theToken);
           res.redirect('/');
         },
 
