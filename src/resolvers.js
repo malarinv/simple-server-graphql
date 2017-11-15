@@ -16,10 +16,15 @@ const resolvers = {
 
     user(obj, args, { token }) {
       if (!token) { return null; }
-      return {
-        id: 111111,
-        displayName: token,
-      };
+      const decoded = jwt.verify(token, SIGNATURE);
+      if (User.findOne({ paypalId: decoded.paypalId })) {
+        return {
+          id: decoded.paypalId,
+          displayName: decoded.name,
+        };
+      }
+      console.log('user not found');
+      return null;
     },
   },
 
