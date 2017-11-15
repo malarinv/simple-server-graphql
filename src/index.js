@@ -7,6 +7,7 @@ const { execute, subscribe } = require('graphql');
 const { SubscriptionServer } = require('subscriptions-transport-ws');
 const cors = require('cors');
 const paypal = require('paypal-rest-sdk');
+const jwt = require('jsonwebtoken');
 
 const { openIdConnect } = paypal;
 
@@ -25,6 +26,7 @@ const {
   PAYPAL_CLIENT_ID,
   PAYPAL_CLIENT_SECRET,
   PAYPAL_REDIRECT_URL,
+  SIGNATURE,
 } = require('./env');
 
 const { User, Event } = require('./db');
@@ -122,7 +124,12 @@ httpServer.get('/login/callback', async (req, res) => {
           Event.create({
             type: 'USER', login: paypalId.split('/').slice(-1)[0], action: 'CREATED', created: new Date(),
           });
-          const theToken = `invite ${userOk.name} ${paypalId}`;
+          const theToken = jwt.sign({
+            paypalId,
+            user: userOk.name,
+          }, SIGNATURE, { expiresIn: '1h' });
+
+          // const theToken = `invite ${userOk.name} ${paypalId}`;
           res.cookie('token', theToken);
           res.redirect('/');
         },
