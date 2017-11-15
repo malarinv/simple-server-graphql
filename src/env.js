@@ -17,7 +17,7 @@ const listOfPhoneNumbers = envalid.makeValidator((value) => {
 module.exports = envalid.cleanEnv(process.env, {
   GRAPHQL_PORT: envalid.port({ default: 4000 }),
   ALLOWED_PHONE_NUMBERS_FOR_GUESTS: listOfPhoneNumbers({
-    default: '',
+    default: '3600',
     example: '+4400000,+723331',
   }),
   GRAPHQL_SUBSCIPTION_PORT: envalid.port({
@@ -45,6 +45,9 @@ module.exports = envalid.cleanEnv(process.env, {
     desc: 'mongodb default connection details',
   }),
   SIGNATURE: envalid.str({
+    desc: 'crash if insecure.',
+  }),
+  SIPSIGNATURE: envalid.str({
     desc: 'crash if insecure.',
   }),
 
