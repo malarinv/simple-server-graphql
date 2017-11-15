@@ -58,6 +58,15 @@ const resolvers = {
         },
       };
     },
+
+    verifyToken(_, { input: token }) {
+      console.log('TOKEN to verify:', token);
+      if (token === 'invite') {
+        return true;
+      }
+      return false;
+    },
+
   },
 
   // Subscription: {},

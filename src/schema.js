@@ -26,6 +26,7 @@ type GenerateSipConfigPayload {
 
 type Mutation {
   generateSipConfig(input: GenerateSipConfigInput!): GenerateSipConfigPayload!
+  verifyToken(input: String!): Boolean!
 }
 
 # type Subscription {
