@@ -1,10 +1,11 @@
 const GraphQLJSON = require('graphql-type-json');
+const jwt = require('jsonwebtoken');
 // const { PubSub, withFilter } = require('graphql-subscriptions');
 
 // const pubsub = new PubSub();
-const { Event } = require('./db'); // type: String, login: String, action: String, destination: String, created: Date,
+const { User, Event } = require('./db'); // type: String, login: String, action: String, destination: String, created: Date,
 
-const { ALLOWED_PHONE_NUMBERS_FOR_GUESTS } = require('./env');
+const { ALLOWED_PHONE_NUMBERS_FOR_GUESTS, SIGNATURE } = require('./env');
 
 const resolvers = {
   JSON: GraphQLJSON,
@@ -61,10 +62,19 @@ const resolvers = {
 
     verifyToken(_, { input: token }) {
       console.log('TOKEN to verify:', token);
-      if (token === 'invite') {
+
+      try {
+        const decoded = jwt.verify(token, SIGNATURE);
+        console.log('DECODED:', decoded); // bar
+        if (User.findOne({ paypalId: decoded.paypalId })) {
+          console.log('user found');
+        } else {
+          console.log('user not found');
+        }
         return true;
+      } catch (err) {
+        return false;
       }
-      return false;
     },
 
   },

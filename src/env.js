@@ -44,5 +44,8 @@ module.exports = envalid.cleanEnv(process.env, {
     default: 'mongodb://localhost/callthemonline',
     desc: 'mongodb default connection details',
   }),
+  SIGNATURE: envalid.str({
+    desc: 'crash if insecure.',
+  }),
 
 });
