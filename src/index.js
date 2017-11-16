@@ -148,6 +148,7 @@ httpServer.get('/login/callback', async (req, res) => {
   res.redirect('/sorry');
 });
 
+httpServer.use(bodyParser.urlencoded({ extended: true }));
 
 const getTokenFromRequest = (req) => req.body.token || req.params.token || req.headers.token;
 httpServer.use(
