@@ -151,7 +151,7 @@ httpServer.get('/login/callback', async (req, res) => {
 
 const getTokenFromRequest = (req) => req.body.token || req.params.token || req.headers.token;
 httpServer.use(
-  /^\/$/,
+  '/api',
   bodyParser.json(),
   graphqlExpress((request) => ({
     schema: executableSchema,
