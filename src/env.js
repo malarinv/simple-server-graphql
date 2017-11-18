@@ -17,11 +17,38 @@ const listOfPhoneNumbers = envalid.makeValidator((value) => {
 module.exports = envalid.cleanEnv(process.env, {
   GRAPHQL_PORT: envalid.port({ default: 4000 }),
   ALLOWED_PHONE_NUMBERS_FOR_GUESTS: listOfPhoneNumbers({
-    default: '',
+    default: '3600',
     example: '+4400000,+723331',
   }),
   GRAPHQL_SUBSCIPTION_PORT: envalid.port({
     default: 4001,
     desc: 'subscription port (websocket)',
   }),
+  PAYPAL_MODE: envalid.str({
+    default: 'sandbox',
+    desc: 'paypal environment sandbox | live',
+  }),
+  PAYPAL_CLIENT_ID: envalid.str({
+    default: 'NULL',
+    desc: 'paypal client id',
+  }),
+  PAYPAL_CLIENT_SECRET: envalid.str({
+    default: 'NULL',
+    desc: 'paypal client secret',
+  }),
+  PAYPAL_REDIRECT_URL: envalid.url({
+    default: 'http://localhost/callback',
+    desc: 'paypal redirect url',
+  }),
+  MONGO_URL: envalid.str({
+    default: 'mongodb://localhost/callthemonline',
+    desc: 'mongodb default connection details',
+  }),
+  SIGNATURE: envalid.str({
+    desc: 'crash if insecure.',
+  }),
+  SIPSIGNATURE: envalid.str({
+    desc: 'crash if insecure.',
+  }),
+
 });

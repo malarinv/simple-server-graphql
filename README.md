@@ -1,2 +1,2 @@
 # simple-server-graphql
-GraphQL server
+GraphQL server with authentication and call configuration capabilities

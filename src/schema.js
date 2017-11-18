@@ -1,9 +1,18 @@
-module.exports = /* GraphQL */ `
+module.exports = /* GraphQL */`
 
 scalar JSON
 
+# headers: auth
+
+type User {
+  displayName: String!
+  id: String!
+}
+
 type Query {
   unixTimestamp: Int!
+  user: User
+  loginUrl: String!
 }
 
 
@@ -17,6 +26,7 @@ type GenerateSipConfigPayload {
 
 type Mutation {
   generateSipConfig(input: GenerateSipConfigInput!): GenerateSipConfigPayload!
+  verifyToken(input: String!): Boolean!
 }
 
 # type Subscription {
