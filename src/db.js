@@ -5,14 +5,25 @@ const {
 } = require('./env');
 
 
-mongoose.connect(MONGO_URL, { useMongoClient: true });
+const options = {
+  useMongoClient: true,
+  autoIndex: false,
+  reconnectTries: Number.MAX_VALUE,
+  reconnectInterval: 500,
+  poolSize: 1,
+  bufferMaxEntries: 0,
+};
+
+mongoose.connect(MONGO_URL, options);
+
+
 mongoose.Promise = global.Promise;
 
 const User = mongoose.model('User', {
   name: String, paypalCode: String, paypalId: String, token: String, updated: Date, created: Date,
 });
 const Event = mongoose.model('Event', {
-  type: String, login: String, action: String, destination: String, created: Date,
+  type: String, login: String, action: String, destination: String, comment: String, created: Date,
 });
 
 

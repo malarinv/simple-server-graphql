@@ -32,7 +32,7 @@ const resolvers = {
   Mutation: {
     generateSipConfig: async (_, { input: { phoneNumber } }, { token }) => {
       Event.create({
-        type: 'REQUEST', action: 'PROCESS CALL REQUEST', destination: phoneNumber, created: new Date(),
+        type: 'REQUEST', comment: `Token: ${token}`, action: 'PROCESS CALL REQUEST', destination: phoneNumber, created: new Date(),
       });
       console.log('TOKEN ISsss:', token);
 
@@ -50,6 +50,9 @@ const resolvers = {
           throw new Error(`User with paypalId ${decoded.paypalId}`);
         }
         console.log('USER FOUND:', user);
+        Event.create({
+          type: 'REQUEST', comment: `User: ${user.name}`, login: decoded.paypalId, action: 'PROCESS CALL', destination: phoneNumber, created: new Date(),
+        });
 
         sipToken = jwt.sign({
           paypalId: decoded.paypalId,
@@ -64,6 +67,10 @@ const resolvers = {
           }, SIPSIGNATURE, { expiresIn: '1m' });
         } else {
           console.log('CALL ATTEMPT REJECTED');
+          Event.create({
+            type: 'REQUEST', action: 'PROCESS CALL REJECTED', destination: phoneNumber, created: new Date(),
+          });
+
           throw new Error(`Unverified users cannot call ${phoneNumber}`);
         }
       }
