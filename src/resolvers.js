@@ -30,58 +30,59 @@ const resolvers = {
   },
 
   Mutation: {
-    generateSipConfig: (_, { input: { phoneNumber } }, { token }) => {
+    generateSipConfig: async (_, { input: { phoneNumber } }, { token }) => {
       Event.create({
         type: 'REQUEST', action: 'PROCESS CALL REQUEST', destination: phoneNumber, created: new Date(),
       });
       console.log('TOKEN ISsss:', token);
 
-      if (ALLOWED_PHONE_NUMBERS_FOR_GUESTS.indexOf(phoneNumber) === -1) {
-        Event.create({
-          type: 'REQUEST', action: 'FAIL', destination: phoneNumber, created: new Date(),
-        });
-
-        throw new Error(`Cannot provide auth for calling ${phoneNumber} to guests.`);
-      }
+      let sipToken;
 
       try {
         const decoded = jwt.verify(token, SIGNATURE);
-        console.log('SipRequst Toke decoded;', decoded);
+        console.log('SipRequst Token decoded;', decoded);
         Event.create({
           type: 'CALL', login: decoded.user, action: 'SUCCESS', destination: phoneNumber, created: new Date(),
         });
 
-        User.findOne({ paypalId: decoded.paypalId }, (err, user) => {
-          console.log('USER FOUND:', user);
-        });
+        const user = await User.findOne({ paypalId: decoded.paypalId });
+        if (!user) {
+          throw new Error(`User with paypalId ${decoded.paypalId}`);
+        }
+        console.log('USER FOUND:', user);
 
-        const sipToken = jwt.sign({
+        sipToken = jwt.sign({
           paypalId: decoded.paypalId,
           destination: phoneNumber,
         }, SIPSIGNATURE, { expiresIn: '1m' });
-
-        console.log('SIPTOKEN:', sipToken);
-        return {
-          config: {
-            host: 'dev.callthem.online',
-            port: '7443',
-            user: '1007',
-            password: '31337',
-            iceServers: [
-              {
-                urls: 'turn:free.nikulin.website:5349?transport=tcp',
-                username: 'free',
-                credential: 'denis',
-              },
-            ],
-            extraHeaders: {
-              invite: [`X-Token: ${sipToken}`],
-            },
-          },
-        };
-      } catch (err) {
-        throw new Error(`Cannot process you call to ${phoneNumber}. Please log in`);
+      } catch (e) {
+        if (ALLOWED_PHONE_NUMBERS_FOR_GUESTS.indexOf(phoneNumber) !== -1) {
+          console.log('Whitelisted number: ', phoneNumber);
+          sipToken = jwt.sign({
+            paypalId: null,
+            destination: phoneNumber,
+          }, SIPSIGNATURE, { expiresIn: '1m' });
+        } else {
+          console.log('CALL ATTEMPT REJECTED');
+          throw new Error(`Unverified users cannot call ${phoneNumber}`);
+        }
       }
+      return {
+        config: {
+          host: 'dev.callthem.online',
+          port: '8443',
+          iceServers: [
+            {
+              urls: 'turn:free.nikulin.website:5349?transport=tcp',
+              username: 'free',
+              credential: 'denis',
+            },
+          ],
+          extraHeaders: {
+            invite: [`X-Token: ${sipToken}`],
+          },
+        },
+      };
     },
 
     verifyToken(_, { input: token }) {
