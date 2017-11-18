@@ -77,7 +77,9 @@ const resolvers = {
       return {
         config: {
           host: 'dev.callthem.online',
+          user: '1007',
           port: 8443,
+          autoRegister: false,
           iceServers: [
             {
               urls: 'turn:free.nikulin.website:5349?transport=tcp',
