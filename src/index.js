@@ -45,7 +45,6 @@ paypal.configure({
   'mode': PAYPAL_MODE,
   'openid_client_id': PAYPAL_CLIENT_ID,
   'openid_client_secret': PAYPAL_CLIENT_SECRET,
-  'openid_redirect_uri': PAYPAL_REDIRECT_URL,
 });
 
 const getUserDetails = (authCode) => new Promise((resolve, reject) => {
@@ -80,7 +79,11 @@ console.log('Date now:', new Date());
 
 /* GET home page. */
 httpServer.get('/login', (req, res) => {
-  const redirectUrl = openIdConnect.authorizeUrl({ 'scope': 'openid https://uri.paypal.com/services/paypalattributes profile' });
+  const redirectUrl = openIdConnect.authorizeUrl({
+    'scope': 'openid https://uri.paypal.com/services/paypalattributes profile',
+    'redirect_uri': `${req.protocol}://${req.host}${PAYPAL_REDIRECT_URL}`,
+  });
+
   Event.create({
     type: 'LOGIN', action: 'LOGIN REQUEST', created: new Date(),
   });
