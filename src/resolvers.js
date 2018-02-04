@@ -59,7 +59,8 @@ const resolvers = {
           destination: phoneNumber,
         }, SIPSIGNATURE, { expiresIn: '1m' });
       } catch (e) {
-        if (ALLOWED_PHONE_NUMBERS_FOR_GUESTS.indexOf(phoneNumber) !== -1) {
+        const re = new RegExp(ALLOWED_PHONE_NUMBERS_FOR_GUESTS.toString().replace(/,/g, '|').replace(/\+/g, '\\+'));
+        if (re.test(phoneNumber)) {
           console.log('Whitelisted number: ', phoneNumber);
           sipToken = jwt.sign({
             paypalId: null,
