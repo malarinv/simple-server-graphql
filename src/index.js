@@ -81,7 +81,7 @@ console.log('Date now:', new Date());
 httpServer.get('/login', (req, res) => {
   const redirectUrl = openIdConnect.authorizeUrl({
     'scope': 'openid https://uri.paypal.com/services/paypalattributes profile',
-    'redirect_uri': `${req.protocol}://${req.host}${PAYPAL_REDIRECT_URL}`,
+    'redirect_uri': `https://${req.host}${PAYPAL_REDIRECT_URL}`,
   });
 
   Event.create({
