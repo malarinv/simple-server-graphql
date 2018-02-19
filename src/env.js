@@ -58,5 +58,9 @@ module.exports = envalid.cleanEnv(process.env, {
   SIPSIGNATURE: envalid.str({
     desc: 'crash if insecure.',
   }),
+  SIP_SERVER: envalid.str({
+    default: 'callthem.online',
+    desc: 'SIP server hostname.',
+  }),
 
 });

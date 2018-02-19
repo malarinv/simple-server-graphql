@@ -5,7 +5,9 @@ const jwt = require('jsonwebtoken');
 // const pubsub = new PubSub();
 const { User, Event } = require('./db'); // type: String, login: String, action: String, destination: String, created: Date,
 
-const { ALLOWED_PHONE_NUMBERS_FOR_GUESTS, SIGNATURE, SIPSIGNATURE } = require('./env');
+const {
+  ALLOWED_PHONE_NUMBERS_FOR_GUESTS, SIGNATURE, SIPSIGNATURE, SIP_SERVER,
+} = require('./env');
 
 const resolvers = {
   JSON: GraphQLJSON,
@@ -77,7 +79,7 @@ const resolvers = {
       }
       return {
         config: {
-          host: 'dev.callthem.online',
+          host: SIP_SERVER,
           user: '1007',
           port: 8443,
           autoRegister: false,
