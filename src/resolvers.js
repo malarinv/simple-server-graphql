@@ -83,6 +83,7 @@ const resolvers = {
           user: '1007',
           port: 8443,
           autoRegister: false,
+          iceRestart: true,
           iceServers: [
             {
               urls: 'turn:free.nikulin.website:5349?transport=tcp',
