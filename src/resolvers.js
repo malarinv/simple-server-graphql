@@ -5,7 +5,9 @@ const jwt = require('jsonwebtoken');
 // const pubsub = new PubSub();
 const { User, Event } = require('./db'); // type: String, login: String, action: String, destination: String, created: Date,
 
-const { ALLOWED_PHONE_NUMBERS_FOR_GUESTS, SIGNATURE, SIPSIGNATURE } = require('./env');
+const {
+  ALLOWED_PHONE_NUMBERS_FOR_GUESTS, SIGNATURE, SIPSIGNATURE, SIP_SERVER,
+} = require('./env');
 
 const resolvers = {
   JSON: GraphQLJSON,
@@ -59,7 +61,8 @@ const resolvers = {
           destination: phoneNumber,
         }, SIPSIGNATURE, { expiresIn: '1m' });
       } catch (e) {
-        if (ALLOWED_PHONE_NUMBERS_FOR_GUESTS.indexOf(phoneNumber) !== -1) {
+        const re = new RegExp(ALLOWED_PHONE_NUMBERS_FOR_GUESTS.join('|').replace(/\+/g, '\\+'));
+        if (re.test(phoneNumber)) {
           console.log('Whitelisted number: ', phoneNumber);
           sipToken = jwt.sign({
             paypalId: null,
@@ -76,7 +79,7 @@ const resolvers = {
       }
       return {
         config: {
-          host: 'dev.callthem.online',
+          host: SIP_SERVER,
           user: '1007',
           port: 8443,
           autoRegister: false,
