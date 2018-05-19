@@ -22,6 +22,7 @@
     "lodash": "^4.17.10",
     "mongoose": "^5.1.1",
     "passport": "^0.4.0",
+    "passport-paypal-oauth": "github:vguardiola/passport-paypal-oauth",
     "passport-telegram-official": "^1.0.3",
     "paypal-rest-sdk": "^1.8.1",
     "subscriptions-transport-ws": "^0.9.9"

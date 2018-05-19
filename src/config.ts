@@ -51,9 +51,9 @@ export const env = envalid.cleanEnv(process.env, {
     default: "NULL",
     desc: "paypal client secret",
   }),
-  PAYPAL_REDIRECT_URL: callbackPath({
+  PAYPAL_REDIRECT_PATH: callbackPath({
     default: "/callback",
-    desc: "paypal redirect url",
+    desc: "paypal redirect path",
   }),
   MONGO_URL: envalid.str({
     default: "mongodb://localhost/callthemonline",
@@ -68,5 +68,17 @@ export const env = envalid.cleanEnv(process.env, {
   SIP_SERVER: envalid.str({
     default: "callthem.online",
     desc: "SIP server hostname.",
+  }),
+  TELEGRAM_TOKEN: envalid.str({
+    default: "SECURE:TOKEN",
+    desc: "Telegram Token.",
+  }),
+  TELEGRAM_BOT: envalid.str({
+    default: "telegram_bot_name",
+    desc: "Telegram Bot name.",
+  }),
+  TELEGRAM_REDIRECT_PATH: callbackPath({
+    default: "/login/telegram/callback",
+    desc: "Telegram callback path.",
   }),
 });

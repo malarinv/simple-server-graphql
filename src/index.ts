@@ -6,6 +6,7 @@ import { makeExecutableSchema } from "graphql-tools";
 import * as jwt from "jsonwebtoken";
 import * as passport from "passport";
 import * as TelegramStrategy from "passport-telegram-official";
+const PayPalStrategy = require('passport-paypal-oauth').Strategy;
 import * as paypal from "paypal-rest-sdk";
 import { env } from "./config";
 import { Event, User } from "./db";
@@ -19,8 +20,8 @@ const throwError = () => {
   );
 };
 
-const botToken = "TO:KEN" || throwError();
-const botName = "BOTNAME" || throwError();
+const botToken = env.TELEGRAM_TOKEN || throwError();
+const botName = env.TELEGRAM_BOT || throwError();
 
 const executableSchema = makeExecutableSchema({
   typeDefs,
@@ -93,17 +94,29 @@ passport.serializeUser((user, done) => {
   done(null, user);
 });
 
-passport.use(
+passport.use( 'telegram',
   new TelegramStrategy(
     { botToken, passReqToCallback: true },
     (req, user, done) => {
       console.log(user);
 
       req.user = user;
-      done(null, user);
+      done(null, user, null);
     },
   ),
 );
+
+passport.use('paypal-token',
+new PayPalStrategy({
+  clientID: env.PAYPAL_CLIENT_ID,
+  clientSecret: env.PAYPAL_CLIENT_SECRET,
+  callbackURL: env.PAYPAL_REDIRECT_PATH,
+  sandbox: true
+}, (req, accessToken, refreshToken, profile, next) => {
+  console.log('accessToken', accessToken)
+  console.log('PROFILE', profile)
+      return next(null, profile);
+}));
 
 httpServer.use(bodyParser.urlencoded({ extended: true }));
 httpServer.use(passport.initialize());
@@ -121,7 +134,7 @@ type RequestWithTelegramUser = express.Request & {
 };
 
 httpServer.use(
-  "/login/callback",
+  "/login/telegram/callback",
   passport.authenticate("telegram"),
   (req: RequestWithTelegramUser, res) => {
     console.log("CALLBACK");
@@ -130,7 +143,7 @@ httpServer.use(
 );
 
 // Here we create page with auth widget
-httpServer.use("/login", (req, res) => {
+httpServer.use("/login/telegram", (req, res) => {
   console.log("login in attempt");
   res.send(`<html>
 <head></head>
@@ -141,7 +154,7 @@ httpServer.use("/login", (req, res) => {
          src="https://telegram.org/js/telegram-widget.js?4"
          data-telegram-login="${botName}"
          data-size="medium"
-         data-auth-url="https://TELEGRAMAUTHCALLBACKURL.me/login/callback"
+         data-auth-url="${env.TELEGRAM_REDIRECT_PATH}"
          data-request-access="write"
        ></script>
   </div>
@@ -149,25 +162,10 @@ httpServer.use("/login", (req, res) => {
 </html>`);
 });
 
-/* GET home page. */
-httpServer.get("/loginpaypal", (req, res) => {
-  // paypal
-  const redirectUrl = openIdConnect.authorizeUrl({
-    scope: "openid https://uri.paypal.com/services/paypalattributes profile",
-    redirect_uri: `https://${req.hostname}${env.PAYPAL_REDIRECT_URL}`,
-  });
+httpServer.get('/login/paypal', passport.authenticate('paypal-token'));
 
-  Event.create({
-    type: "LOGIN",
-    action: "LOGIN REQUEST",
-    created: new Date(),
-  });
+httpServer.get("/login/paypal/callback", async (req, res) => {
 
-  console.log("redirecting to:", redirectUrl);
-  res.redirect(redirectUrl);
-});
-
-httpServer.get("/loginpaypal/callback", async (req, res) => {
   const paypalCode = req.query.code;
   Event.create({
     type: "LOGIN",
