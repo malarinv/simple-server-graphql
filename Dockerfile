@@ -3,7 +3,8 @@ FROM node:alpine
 RUN mkdir -p /app
 WORKDIR /app
 COPY package.json package-lock.json /app/
-RUN npm install --only=production --no-cache
+RUN npm install --only=production 
+RUN npm cache clean
 
 COPY build /app/build/
 
