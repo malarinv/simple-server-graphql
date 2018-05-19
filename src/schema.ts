@@ -1,4 +1,4 @@
-module.exports = /* GraphQL */`
+export default /* GraphQL */ `
 
 scalar JSON
 
