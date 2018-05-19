@@ -61,7 +61,7 @@ const resolvers = {
           destination: phoneNumber,
         }, SIPSIGNATURE, { expiresIn: '1m' });
       } catch (e) {
-        const re = new RegExp(ALLOWED_PHONE_NUMBERS_FOR_GUESTS.join('|').replace(/\+/g, '\\+'));
+        const re = new RegExp(`^${ALLOWED_PHONE_NUMBERS_FOR_GUESTS.join('|').replace(/\+/g, '\\+')}$`);
         if (re.test(phoneNumber)) {
           console.log('Whitelisted number: ', phoneNumber);
           sipToken = jwt.sign({

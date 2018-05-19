@@ -8,8 +8,14 @@ const { SubscriptionServer } = require('subscriptions-transport-ws');
 const cors = require('cors');
 const paypal = require('paypal-rest-sdk');
 const jwt = require('jsonwebtoken');
+const passport = require('passport');
+const TelegramStrategy = require('passport-telegram-official');
 
 const { openIdConnect } = paypal;
+const throwError = () => { throw new TypeError('Please provide your credentials through BOT_TOKEN and BOT_NAME envivroment variable. Also set PORT to 80'); };
+
+const botToken = 'TO:KEN' || throwError();
+const botName = 'BOTNAME' || throwError();
 
 const typeDefs = require('./schema');
 const resolvers = require('./resolvers');
@@ -77,8 +83,53 @@ const httpServer = express();
 httpServer.use(cors(corsOptions));
 console.log('Date now:', new Date());
 
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.use(new TelegramStrategy({ botToken, passReqToCallback: true }, (req, user, done) => {
+  console.log(user);
+
+  req.user = user;
+  done(null, user);
+}));
+
+
+httpServer.use(bodyParser.urlencoded({ extended: true }));
+httpServer.use(passport.initialize());
+
+
+httpServer.use('/login/callback', passport.authenticate('telegram'), (req, res) => {
+  console.log('CALLBACK');
+  res.send(`You logged in! Hello ${req.user.first_name}!`);
+});
+
+// Here we create page with auth widget
+httpServer.use('/login', (req, res) => {
+  console.log('login in attempt');
+  res.send(`<html>
+<head></head>
+<body>
+  <div id="widget">
+      <script 
+         async 
+         src="https://telegram.org/js/telegram-widget.js?4"
+         data-telegram-login="${botName}"
+         data-size="medium"
+         data-auth-url="https://TELEGRAMAUTHCALLBACKURL.me/login/callback"
+         data-request-access="write"
+       ></script>
+  </div>
+</body>
+</html>`);
+});
+
 /* GET home page. */
-httpServer.get('/login', (req, res) => {
+httpServer.get('/loginpaypal', (req, res) => { // paypal
   const redirectUrl = openIdConnect.authorizeUrl({
     'scope': 'openid https://uri.paypal.com/services/paypalattributes profile',
     'redirect_uri': `https://${req.hostname}${PAYPAL_REDIRECT_URL}`,
@@ -92,7 +143,7 @@ httpServer.get('/login', (req, res) => {
   res.redirect(redirectUrl);
 });
 
-httpServer.get('/login/callback', async (req, res) => {
+httpServer.get('/loginpaypal/callback', async (req, res) => {
   const paypalCode = req.query.code;
   Event.create({
     type: 'LOGIN', action: 'CALBACK CHECK', created: new Date(),

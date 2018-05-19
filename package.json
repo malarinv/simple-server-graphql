@@ -21,6 +21,8 @@
     "jsonwebtoken": "^8.1.0",
     "lodash": "^4.17.4",
     "mongoose": "^4.13.1",
+    "passport": "^0.4.0",
+    "passport-telegram-official": "^1.0.3",
     "paypal-rest-sdk": "^1.7.1",
     "subscriptions-transport-ws": "^0.9.1"
   },
