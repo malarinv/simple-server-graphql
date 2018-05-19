@@ -6,7 +6,7 @@ import { makeExecutableSchema } from "graphql-tools";
 import * as jwt from "jsonwebtoken";
 import * as passport from "passport";
 import { Strategy as PayPalStrategy } from "passport-paypal-oauth";
-import * as TelegramStrategy from "passport-telegram-official";
+import TelegramStrategy = require("passport-telegram-official");
 import * as paypal from "paypal-rest-sdk";
 import { env } from "./config";
 
@@ -215,6 +215,7 @@ httpServer.get("/login/paypal/callback", async (req, res) => {
           action: "CREATED",
           created: new Date(),
         });
+
         const theToken = jwt.sign(
           {
             paypalId,
