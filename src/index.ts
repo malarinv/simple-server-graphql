@@ -5,10 +5,11 @@ import { graphqlExpress } from "graphql-server-express";
 import { makeExecutableSchema } from "graphql-tools";
 import * as jwt from "jsonwebtoken";
 import * as passport from "passport";
+import { Strategy as PayPalStrategy } from "passport-paypal-oauth";
 import * as TelegramStrategy from "passport-telegram-official";
-const PayPalStrategy = require('passport-paypal-oauth').Strategy;
 import * as paypal from "paypal-rest-sdk";
 import { env } from "./config";
+
 import { Event, User } from "./db";
 import resolvers from "./resolvers";
 import typeDefs from "./schema";
@@ -94,7 +95,8 @@ passport.serializeUser((user, done) => {
   done(null, user);
 });
 
-passport.use( 'telegram',
+passport.use(
+  "telegram",
   new TelegramStrategy(
     { botToken, passReqToCallback: true },
     (req, user, done) => {
@@ -106,17 +108,22 @@ passport.use( 'telegram',
   ),
 );
 
-passport.use('paypal-token',
-new PayPalStrategy({
-  clientID: env.PAYPAL_CLIENT_ID,
-  clientSecret: env.PAYPAL_CLIENT_SECRET,
-  callbackURL: env.PAYPAL_REDIRECT_PATH,
-  sandbox: true
-}, (req, accessToken, refreshToken, profile, next) => {
-  console.log('accessToken', accessToken)
-  console.log('PROFILE', profile)
+passport.use(
+  "paypal-token",
+  new PayPalStrategy(
+    {
+      clientID: env.PAYPAL_CLIENT_ID,
+      clientSecret: env.PAYPAL_CLIENT_SECRET,
+      callbackURL: env.PAYPAL_REDIRECT_PATH,
+      sandbox: true,
+    },
+    (req, accessToken, refreshToken, profile, next) => {
+      console.log("accessToken", accessToken);
+      console.log("PROFILE", profile);
       return next(null, profile);
-}));
+    },
+  ),
+);
 
 httpServer.use(bodyParser.urlencoded({ extended: true }));
 httpServer.use(passport.initialize());
@@ -162,10 +169,9 @@ httpServer.use("/login/telegram", (req, res) => {
 </html>`);
 });
 
-httpServer.get('/login/paypal', passport.authenticate('paypal-token'));
+httpServer.get("/login/paypal", passport.authenticate("paypal-token"));
 
 httpServer.get("/login/paypal/callback", async (req, res) => {
-
   const paypalCode = req.query.code;
   Event.create({
     type: "LOGIN",
