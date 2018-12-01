@@ -1,5 +1,7 @@
 FROM node:alpine
 
+RUN apk --update --no-cache add git
+
 RUN mkdir -p /app
 WORKDIR /app
 

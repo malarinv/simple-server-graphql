@@ -55,6 +55,10 @@ export const env = envalid.cleanEnv(process.env, {
     default: "/callback",
     desc: "paypal redirect path",
   }),
+  PAYPAL_REDIRECT_URL: envalid.str({
+    default: "http://localhost/callback",
+    desc: "paypal redirect URL",
+  }),
   MONGO_URL: envalid.str({
     default: "mongodb://localhost/callthemonline",
     desc: "mongodb default connection details",

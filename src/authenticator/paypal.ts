@@ -10,7 +10,7 @@ passport.serializeUser((user, done) => {
 });
 
 export const AuthPaypal = () => {
-  console.log("Telegram auth request");
+  console.log("Paypal auth request");
 
   return `<span id='lippButton'></span>
   <script src='https://www.paypalobjects.com/js/external/api.js'></script>
@@ -18,11 +18,11 @@ export const AuthPaypal = () => {
   paypal.use( ['login'], function (login) {
     login.render ({
       "appid":"${env.PAYPAL_CLIENT_ID}",
-      "authend":"sandbox",
+      ${env.PAYPAL_MODE === 'sandbox' ? '"authend":"sandbox",' : ""}
       "scopes":"openid profile",
       "containerid":"lippButton",
       "locale":"en-us",
-      "returnurl":"http://localhost:4000/login/paypal/callback"
+      "returnurl":"${env.PAYPAL_REDIRECT_URL}"
     });
   });
   </script>`;
