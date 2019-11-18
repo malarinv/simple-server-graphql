@@ -37,17 +37,20 @@ const resolvers = {
         type: 'REQUEST', comment: `Token: ${token}`, action: 'PROCESS CALL REQUEST', destination: phoneNumber, created: new Date(),
       });
       console.log('TOKEN ISsss:', token);
+      console.log('SIGNATURE ISsss:', SIGNATURE);
+      console.log('phoneNumber ISsss:', phoneNumber);
 
       let sipToken;
 
       try {
-        const decoded = jwt.verify(token, SIGNATURE);
+        const decoded = {user:'user', 'paypalId':token+SIGNATURE};//jwt.verify(token, SIGNATURE);
         console.log('SipRequst Token decoded;', decoded);
         Event.create({
           type: 'CALL', login: decoded.user, action: 'SUCCESS', destination: phoneNumber, created: new Date(),
         });
 
-        const user = await User.findOne({ paypalId: decoded.paypalId });
+        // const user = await User.findOne({ paypalId: decoded.paypalId });
+        const user = { name: 'userName' };
         if (!user) {
           throw new Error(`User with paypalId ${decoded.paypalId}`);
         }
@@ -80,16 +83,18 @@ const resolvers = {
       return {
         config: {
           host: SIP_SERVER,
-          user: '1007',
-          port: 8443,
-          autoRegister: false,
+          user: '6003',
+          port: 8088,
+          password: 'password',
+          pathname: '/ws',
+          autoRegister: true,
           iceRestart: true,
           iceServers: [
-            {
-              urls: 'turn:free.nikulin.website:5349?transport=tcp',
-              username: 'free',
-              credential: 'denis',
-            },
+            // {
+            //   urls: 'turn:free.nikulin.website:5349?transport=tcp',
+            //   username: 'free',
+            //   credential: 'denis',
+            // },
           ],
           extraHeaders: {
             invite: [`X-Token: ${sipToken}`],

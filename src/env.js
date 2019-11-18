@@ -25,7 +25,7 @@ const callbackPath = envalid.makeValidator((value) => {
 module.exports = envalid.cleanEnv(process.env, {
   GRAPHQL_PORT: envalid.port({ default: 4000 }),
   ALLOWED_PHONE_NUMBERS_FOR_GUESTS: listOfPhoneNumbers({
-    default: '3600',
+    default: '6004',
     example: '+4400000,+723331',
   }),
   GRAPHQL_SUBSCIPTION_PORT: envalid.port({
@@ -45,7 +45,7 @@ module.exports = envalid.cleanEnv(process.env, {
     desc: 'paypal client secret',
   }),
   PAYPAL_REDIRECT_URL: callbackPath({
-    default: '/callback',
+    default: '/login/callback?code=paypalcode',
     desc: 'paypal redirect url',
   }),
   MONGO_URL: envalid.str({
@@ -53,13 +53,15 @@ module.exports = envalid.cleanEnv(process.env, {
     desc: 'mongodb default connection details',
   }),
   SIGNATURE: envalid.str({
+    default: 'somesignature',
     desc: 'crash if insecure.',
   }),
   SIPSIGNATURE: envalid.str({
+    default: 'somesipsignature',
     desc: 'crash if insecure.',
   }),
   SIP_SERVER: envalid.str({
-    default: 'callthem.online',
+    default: '192.168.1.72',
     desc: 'SIP server hostname.',
   }),
 
